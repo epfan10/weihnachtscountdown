@@ -81,19 +81,22 @@ h1 {
 <script>
 const countdownEl = document.getElementById("countdown");
 
-/* ===== SERVERZEIT HOLEN ===== */
+let currentTime;
+let targetTime;
+let christmasShown = false;
+
+/* ===== SERVERZEIT ===== */
 async function getServerTime() {
     try {
         const res = await fetch("https://worldtimeapi.org/api/timezone/Europe/Berlin");
         const data = await res.json();
         return new Date(data.datetime);
     } catch {
-        // Fallback: lokale Zeit
         return new Date();
     }
 }
 
-/* ===== LOGIK ===== */
+/* ===== HILFSFUNKTIONEN ===== */
 function isChristmasDay(date) {
     return date.getMonth() === 11 && date.getDate() === 24;
 }
@@ -115,29 +118,30 @@ function fadeText(text) {
     }, 600);
 }
 
-let currentTime;
-let targetTime;
-
-/* ===== HAUPTUPDATE ===== */
-async function start() {
+/* ===== COUNTDOWN ===== */
+async function startCountdown() {
     currentTime = await getServerTime();
     targetTime = getNextTarget(currentTime).getTime();
 
     setInterval(() => {
         currentTime = new Date(currentTime.getTime() + 1000);
 
-        // 🎄 24. Dezember
+        // 🎄 Heiligabend
         if (isChristmasDay(currentTime)) {
             countdownEl.classList.add("christmas");
-            fadeText("🎅 Frohe Weihnachten!");
+
+            if (!christmasShown) {
+                fadeText("🎅 Frohe Weihnachten!");
+                christmasShown = true;
+            }
             return;
-        } else {
-            countdownEl.classList.remove("christmas");
         }
 
-        // 🔄 Reset ab 25.12.
+        // 🔄 Neues Jahr
         if (currentTime.getTime() >= targetTime) {
             targetTime = getNextTarget(currentTime).getTime();
+            christmasShown = false;
+            countdownEl.classList.remove("christmas");
             fadeText("✨ Neues Weihnachtsjahr startet …");
             return;
         }
@@ -166,8 +170,9 @@ for (let i = 0; i < 80; i++) {
     snowContainer.appendChild(flake);
 }
 
-start();
+startCountdown();
 </script>
 
 </body>
 </html>
+
