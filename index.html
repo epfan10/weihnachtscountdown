@@ -37,17 +37,23 @@ h1 {
     background: rgba(255,255,255,0.15);
     padding: 20px 40px;
     border-radius: 15px;
+
+    /* Effekte NUR im Countdown */
     backdrop-filter: blur(8px);
     box-shadow: 0 0 25px rgba(255,255,255,0.2);
-    transition: opacity 0.6s ease, box-shadow 0.6s ease;
+
+    transition: opacity 0.6s ease;
 }
 
-/* 🎄 Weihnachtszustand: komplett neutral */
+/* 🎄 Weihnachtszustand: Box OHNE Glow */
 #countdown.christmas {
-    font-size: 2.8rem;      /* gleiche Größe */
-    color: white;           /* normale weiße Schrift */
-    text-shadow: none;      /* kein Text-Glow */
-    box-shadow: none;       /* kein Box-Glow */
+    font-size: 2.8rem;
+    color: white;
+
+    background: #1b3c59;   /* fester, dunkler Hintergrund */
+    box-shadow: none;      /* kein Glow */
+    backdrop-filter: none; /* kein Blur */
+    text-shadow: none;     /* kein Text-Glow */
 }
 
 /* ===== Schneefall ===== */
@@ -88,7 +94,6 @@ let currentTime;
 let targetTime;
 let christmasShown = false;
 
-/* ===== SERVERZEIT ===== */
 async function getServerTime() {
     try {
         const res = await fetch("https://worldtimeapi.org/api/timezone/Europe/Berlin");
@@ -99,7 +104,6 @@ async function getServerTime() {
     }
 }
 
-/* ===== HILFSFUNKTIONEN ===== */
 function isChristmasDay(date) {
     return date.getMonth() === 11 && date.getDate() === 24;
 }
@@ -121,7 +125,6 @@ function fadeText(text) {
     }, 600);
 }
 
-/* ===== COUNTDOWN ===== */
 async function startCountdown() {
     currentTime = await getServerTime();
     targetTime = getNextTarget(currentTime).getTime();
@@ -129,10 +132,8 @@ async function startCountdown() {
     setInterval(() => {
         currentTime = new Date(currentTime.getTime() + 1000);
 
-        // 🎄 Heiligabend
         if (isChristmasDay(currentTime)) {
             countdownEl.classList.add("christmas");
-
             if (!christmasShown) {
                 fadeText("🎅 Frohe Weihnachten!");
                 christmasShown = true;
@@ -140,7 +141,6 @@ async function startCountdown() {
             return;
         }
 
-        // 🔄 Neues Jahr
         if (currentTime.getTime() >= targetTime) {
             targetTime = getNextTarget(currentTime).getTime();
             christmasShown = false;
@@ -160,7 +160,7 @@ async function startCountdown() {
     }, 1000);
 }
 
-/* ===== SCHNEEFLOCKEN ===== */
+/* Schneeflocken */
 const snowContainer = document.getElementById("snow");
 for (let i = 0; i < 80; i++) {
     const flake = document.createElement("div");
